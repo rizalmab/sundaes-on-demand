@@ -1,4 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+} from "@testing-library/react";
 import SummaryForm from "../SummaryForm";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
@@ -29,8 +34,9 @@ test("Checkbox enables button on first click, and disables button on second clic
   expect(button).toBeDisabled();
 });
 
-test("Popover responds to hover", () => {
+test("Popover responds to hover", async () => {
   render(<SummaryForm />);
+
   // popover is initially hidden
   const nullPopover = screen.queryByText(
     /no ice cream will actually be delivered/i
@@ -40,13 +46,17 @@ test("Popover responds to hover", () => {
   // popover appears on mouseover
   const termsAndConditions = screen.getByText(/terms and conditions/i);
   userEvent.hover(termsAndConditions);
-  const popover = screen.getByText(/no ice cream will actually be delivered/i);
-  expect(popover).toBeInTheDocument();
+  await waitFor(() => {
+    expect(
+      screen.getByText(/no ice cream will actually be delivered/i)
+    ).toBeInTheDocument();
+  });
 
   // popover disappears on mouseout
   userEvent.unhover(termsAndConditions);
-  const nullPopoverAgain = screen.queryByText(
-    /no ice cream will actually be delivered/i
-  );
-  expect(nullPopoverAgain).not.toBeInTheDocument();
+  await waitFor(() => {
+    expect(
+      screen.queryByText(/no ice cream will actually be delivered/i)
+    ).not.toBeInTheDocument();
+  });
 });
